@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">RestaurantRezervation</string>
+
+
+    <string name="logo_description">Reserved Logo</string>
+    <string name="usernameEditTextHint">Username</string>
+    <string name="passwordEditTextHint">Password</string>
+    <string name="passwordConfirmationEditTextHint">Confirmation</string>
+    <string name="emailEditTextHint">Email</string>
+    <string name="loginButton">Log In</string>
+    <string name="registerButton">Register</string>
+    <string name="registerTextView">No account? Register here!</string>
 </resources>
