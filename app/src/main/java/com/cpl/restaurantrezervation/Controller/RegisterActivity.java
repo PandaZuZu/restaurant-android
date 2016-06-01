@@ -1,9 +1,7 @@
 package com.cpl.restaurantrezervation.Controller;
 
-import android.content.Intent;
+import android.app.Activity;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -12,7 +10,7 @@ import android.widget.Toast;
 
 import com.cpl.restaurantrezervation.R;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends Activity {
 
     private EditText usernameEditText;
     private EditText passwordEditText;
