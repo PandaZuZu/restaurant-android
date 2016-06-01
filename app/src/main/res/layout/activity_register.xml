@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.cpl.restaurantrezervation.Controller.RegisterActivity"
+    tools:context="com.cpl.restaurantrezervation.activity.RegisterActivity"
     android:fillViewport="false">
 
     <RelativeLayout
@@ -23,8 +23,9 @@
             android:layout_centerHorizontal="true"
             android:contentDescription="@string/app_name"/>
 
+
         <EditText
-            android:id="@+id/usernameEditText"
+            android:id="@+id/emailEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/input_margins"
@@ -33,14 +34,16 @@
             android:padding="@dimen/input_padding"
             android:lines="1"
             android:textAlignment="center"
-            android:hint="@string/usernameEditTextHint"/>
+            android:inputType="textEmailAddress"
+            android:hint="@string/emailEditTextHint"/>
+
 
         <EditText
             android:id="@+id/passwordEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/input_margins"
-            android:layout_below="@+id/usernameEditText"
+            android:layout_below="@+id/emailEditText"
             android:layout_centerHorizontal="true"
             android:padding="@dimen/input_padding"
             android:textAlignment="center"
@@ -59,26 +62,12 @@
             android:inputType="textPassword"
             android:hint="@string/passwordConfirmationEditTextHint"/>
 
-
-        <EditText
-            android:id="@+id/emailEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/input_margins"
-            android:layout_below="@+id/passwordConfirmationEditText"
-            android:layout_centerHorizontal="true"
-            android:padding="@dimen/input_padding"
-            android:lines="1"
-            android:textAlignment="center"
-            android:inputType="textEmailAddress"
-            android:hint="@string/emailEditTextHint"/>
-
         <Button
             android:id="@+id/registerButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/input_margins"
-            android:layout_below="@+id/emailEditText"
+            android:layout_below="@+id/passwordConfirmationEditText"
             android:padding="@dimen/input_padding"
             android:textAlignment="center"
             android:background="@color/loginButton"
