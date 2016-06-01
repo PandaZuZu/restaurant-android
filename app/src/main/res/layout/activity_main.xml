@@ -34,6 +34,7 @@
             android:padding="@dimen/input_padding"
             android:lines="1"
             android:textAlignment="center"
+            android:inputType="textEmailAddress"
             android:hint="@string/usernameEditTextHint"/>
 
 

@@ -3,6 +3,7 @@ package com.cpl.restaurantrezervation.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,6 +13,7 @@ import android.widget.Toast;
 import com.cpl.restaurantrezervation.R;
 import com.cpl.restaurantrezervation.application.ReservedApplication;
 import com.cpl.restaurantrezervation.model.User;
+import com.cpl.restaurantrezervation.utils.Utils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -61,7 +63,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private void checkLogin(String username, String password){
         if(username.length() > 0 && password.length() > 0){
             Call<User> result = ((ReservedApplication) getApplication())
-                    .getReservedAPI().authenticate(parseURL(username),parseURL(password));
+                    .getReservedAPI().authenticate(Utils.parseURL(username), Utils.parseURL(password));
 
             result.enqueue(new Callback<User>() {
                 @Override
@@ -85,18 +87,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private void resetInput(){
         usernameEditText.setText(null);
         passwordEditText.setText(null);
-    }
-
-    public static String parseURL(String URL){
-        String parsedURL = URL;
-        String[] toChange = {"(?:@)", "\\."};
-        String[] changeWith = {"%40", "%2E"};
-
-        for(int i = 0; i < toChange.length; i++){
-            parsedURL = parsedURL.replaceAll(toChange[i], changeWith[i]);
-        }
-
-        return parsedURL;
     }
 
     private void setupReferences(){

@@ -3,6 +3,7 @@ package com.cpl.restaurantrezervation.activity;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,6 +12,7 @@ import android.widget.Toast;
 import com.cpl.restaurantrezervation.R;
 import com.cpl.restaurantrezervation.application.ReservedApplication;
 import com.cpl.restaurantrezervation.model.User;
+import com.cpl.restaurantrezervation.utils.Utils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,7 +32,7 @@ public class RegisterActivity extends Activity {
     public static final String PASSWORD_ERROR_TOAST = "Password confirmation does not match!";
     public static final String REGISTER_ERROR_TOAST = "Could not register. Please try again!";
     public static final String REGISTER_SUCCES_TOAST = "Registration Successful!";
-
+    public static final String USER_TAKEN_ERROR = "user not found";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +66,7 @@ public class RegisterActivity extends Activity {
 
     private void tryRegister(String passwordText,
                              String confirmationText,
-                             final String emailText) throws InterruptedException {
+                             String emailText) throws InterruptedException {
 
         if(passwordText.compareTo(confirmationText) != 0){
             resetInput();
@@ -75,7 +77,7 @@ public class RegisterActivity extends Activity {
             Toast.makeText(getApplicationContext(), MainActivity.WRONG_INPUT, Toast.LENGTH_SHORT).show();
         }else{
             Call<User> result = ((ReservedApplication) getApplication()).getReservedAPI()
-                    .register(MainActivity.parseURL(emailText), MainActivity.parseURL(passwordText));
+                    .register(Utils.parseURL(emailText), Utils.parseURL(passwordText));
             result.enqueue(new Callback<User>() {
 
                 /*
@@ -86,7 +88,7 @@ public class RegisterActivity extends Activity {
                     String result = response.body().getEmail();
 
 
-                    if(result.compareTo(emailText) == 0) {
+                    if(!result.contains(USER_TAKEN_ERROR)) {
                         new AsyncTask<Void, Void, Void>() {
 
                             @Override
@@ -120,6 +122,7 @@ public class RegisterActivity extends Activity {
                 @Override
                 public void onFailure(Call<User> call, Throwable t) {
                     resetInput();
+                    Log.e("error", t.getMessage());
                     Toast.makeText(getApplicationContext(), MainActivity.DATABASE_ERROR, Toast.LENGTH_SHORT).show();
                 }
             });
