@@ -14,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class ReservedAdapter {
 
-    public static final String BASE_URL = "https://restaurant-reserved.herokuapp.com/user/";
+    public static final String BASE_URL = "https://restaurant-reserved.herokuapp.com/";
 
     private ReservedAPI reservedAPI;
 

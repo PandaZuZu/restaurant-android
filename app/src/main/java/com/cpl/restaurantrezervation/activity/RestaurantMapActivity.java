@@ -2,6 +2,8 @@ package com.cpl.restaurantrezervation.activity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Camera;
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
@@ -10,34 +12,46 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.cpl.restaurantrezervation.R;
 import com.cpl.restaurantrezervation.application.PermissionUtils;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class RestaurantMapActivity extends AppCompatActivity implements
         OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
         GoogleMap.OnMyLocationButtonClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback{
 
-
-    private LatLng myPosition;
-
     private GoogleMap mMap;
+    private GoogleApiClient googleApiClient;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     private boolean mPermissionDenied = false;
 
+    private Location mLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_map);
 
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.map);
-            mapFragment.getMapAsync(this);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API).build();
 
     }
 
@@ -57,9 +71,27 @@ public class RestaurantMapActivity extends AppCompatActivity implements
 
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
+        CameraUpdate zoom = CameraUpdateFactory.zoomTo(11);
+        mMap.animateCamera(zoom);
+
         mMap.setOnMyLocationButtonClickListener(this);
         enableMyLocation();
 
+        //coonect api to get current location
+        googleApiClient.connect();
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if( googleApiClient != null && googleApiClient.isConnected() ) {
+            googleApiClient.disconnect();
+        }
+    }
+
+    private void addLocations(GoogleMap mMap){
+        mMap.addMarker(new MarkerOptions().position(new LatLng(1, 1)).title("Restaurant"));
     }
 
     private void enableMyLocation(){
@@ -114,4 +146,31 @@ public class RestaurantMapActivity extends AppCompatActivity implements
                 .newInstance(true).show(getSupportFragmentManager(), "dialog");
     }
 
+    @Override
+    public void onConnected(Bundle bundle) {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+            initCamera(mLocation);
+        }
+    }
+
+    public void initCamera(Location mLocation){
+        CameraUpdate center = CameraUpdateFactory.newLatLng(
+                new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
+
+        CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
+
+        mMap.moveCamera(center);
+        mMap.animateCamera(zoom);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
 }
