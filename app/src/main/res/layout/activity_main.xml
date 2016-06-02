@@ -50,6 +50,15 @@
             android:inputType="textPassword"
             android:hint="@string/passwordEditTextHint"/>
 
+        <ProgressBar
+            android:id="@+id/loginSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/logoImageView"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_centerHorizontal="true"
+            />
+
         <Button
             android:id="@+id/loginButton"
             android:layout_width="match_parent"

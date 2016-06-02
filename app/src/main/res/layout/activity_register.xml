@@ -23,6 +23,13 @@
             android:layout_centerHorizontal="true"
             android:contentDescription="@string/app_name"/>
 
+        <ProgressBar
+            android:id="@+id/registerSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/logoImageView"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_centerHorizontal="true"/>
 
         <EditText
             android:id="@+id/emailEditText"

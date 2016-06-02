@@ -1,12 +1,13 @@
 package com.cpl.restaurantrezervation.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,10 +34,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public static final String DATABASE_ERROR = "Could not connect to database!";
     public static final String WRONG_INPUT = "Email or password must not be empty!";
 
+    private ProgressBar loginSpinner;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        loginSpinner = (ProgressBar) findViewById(R.id.loginSpinner);
+        loginSpinner.setVisibility(View.GONE);
 
         setupReferences();
     }
@@ -50,6 +57,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
                 checkLogin(usernameText, passwordText);
 
+                loginSpinner.setVisibility(View.VISIBLE);
+
                 break;
             case R.id.registerLink:
                 Intent registerIntent = new Intent(this, RegisterActivity.class);
@@ -62,24 +71,29 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private void checkLogin(String username, String password){
         if(username.length() > 0 && password.length() > 0){
+
             Call<User> result = ((ReservedApplication) getApplication())
                     .getReservedAPI().authenticate(Utils.parseURL(username), Utils.parseURL(password));
+
 
             result.enqueue(new Callback<User>() {
                 @Override
                 public void onResponse(Call<User> call, Response<User> response) {
                     String result = response.body().getEmail();
+                    loginSpinner.setVisibility(View.GONE);
                     Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onFailure(Call<User> call, Throwable t) {
+                    loginSpinner.setVisibility(View.GONE);
                     Toast.makeText(getApplication(), DATABASE_ERROR, Toast.LENGTH_SHORT).show();
                 }
             });
         }
         else{
             resetInput();
+            loginSpinner.setVisibility(View.GONE);
             Toast.makeText(getApplicationContext(), WRONG_INPUT, Toast.LENGTH_SHORT).show();
         }
     }

@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.cpl.restaurantrezervation.R;
@@ -37,6 +38,8 @@ public class RegisterActivity extends Activity {
     public static final String USER_TAKEN_ERROR = "user not found";
     public static final String REGISTRATION_FAIL = "Email already exists!";
 
+    private ProgressBar registerSpinner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +53,9 @@ public class RegisterActivity extends Activity {
         confirmationEditText = (EditText)findViewById(R.id.passwordConfirmationEditText);
         emailEditText = (EditText)findViewById(R.id.emailEditText);
         registerButton = (Button)findViewById(R.id.registerButton);
+
+        registerSpinner = (ProgressBar) findViewById(R.id.registerSpinner);
+        registerSpinner.setVisibility(View.GONE);
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,6 +90,9 @@ public class RegisterActivity extends Activity {
             Toast.makeText(getApplicationContext(), EMAIL_LENGTH_ERROR, Toast.LENGTH_SHORT).show();
         }
         else{
+
+            registerSpinner.setVisibility(View.VISIBLE);
+
             Call<User> result = ((ReservedApplication) getApplication()).getReservedAPI()
                     .register(Utils.parseURL(emailText), Utils.parseURL(passwordText));
             result.enqueue(new Callback<User>() {
@@ -100,6 +109,7 @@ public class RegisterActivity extends Activity {
 
                             @Override
                             protected void onPostExecute(Void result) {
+                                registerSpinner.setVisibility(View.GONE);
                                 finish();
                             }
 
@@ -121,6 +131,7 @@ public class RegisterActivity extends Activity {
                         }.execute();
                     }
                     else{
+                        registerSpinner.setVisibility(View.GONE);
                         resetInput();
                         Toast.makeText(getApplicationContext(), REGISTRATION_FAIL, Toast.LENGTH_SHORT).show();
                     }
@@ -129,7 +140,7 @@ public class RegisterActivity extends Activity {
                 @Override
                 public void onFailure(Call<User> call, Throwable t) {
                     resetInput();
-
+                    registerSpinner.setVisibility(View.GONE);
                     Log.e("error", t.getMessage());
                     Toast.makeText(getApplicationContext(), MainActivity.DATABASE_ERROR, Toast.LENGTH_SHORT).show();
                 }
