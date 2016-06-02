@@ -17,6 +17,7 @@ import com.cpl.restaurantrezervation.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
 
 /*
     try request to create user on heroku
@@ -30,9 +31,11 @@ public class RegisterActivity extends Activity {
     private Button registerButton;
 
     public static final String PASSWORD_ERROR_TOAST = "Password confirmation does not match!";
-    public static final String REGISTER_ERROR_TOAST = "Could not register. Please try again!";
+    public static final String PASSWORD_LENGTH_ERROR = "Password length must be between 8 and 20!";
+    public static final String EMAIL_LENGTH_ERROR = "Email length must be between 5 and 100!";
     public static final String REGISTER_SUCCES_TOAST = "Registration Successful!";
     public static final String USER_TAKEN_ERROR = "user not found";
+    public static final String REGISTRATION_FAIL = "Email already exists!";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +75,15 @@ public class RegisterActivity extends Activity {
             resetInput();
             Toast.makeText(getApplicationContext(), PASSWORD_ERROR_TOAST, Toast.LENGTH_SHORT).show();
         }
-        else if(passwordText.length() <= 0 && emailText.length() <= 0) {
+        else if(passwordText.length() < 8 && passwordText.length() > 20) {
             resetInput();
-            Toast.makeText(getApplicationContext(), MainActivity.WRONG_INPUT, Toast.LENGTH_SHORT).show();
-        }else{
+            Toast.makeText(getApplicationContext(), PASSWORD_LENGTH_ERROR, Toast.LENGTH_SHORT).show();
+        }
+        else if(emailText.length() < 5 || emailText.length() > 100){
+            resetInput();
+            Toast.makeText(getApplicationContext(), EMAIL_LENGTH_ERROR, Toast.LENGTH_SHORT).show();
+        }
+        else{
             Call<User> result = ((ReservedApplication) getApplication()).getReservedAPI()
                     .register(Utils.parseURL(emailText), Utils.parseURL(passwordText));
             result.enqueue(new Callback<User>() {
@@ -86,7 +94,6 @@ public class RegisterActivity extends Activity {
                 @Override
                 public void onResponse(Call<User> call, Response<User> response) {
                     String result = response.body().getEmail();
-
 
                     if(!result.contains(USER_TAKEN_ERROR)) {
                         new AsyncTask<Void, Void, Void>() {
@@ -115,13 +122,14 @@ public class RegisterActivity extends Activity {
                     }
                     else{
                         resetInput();
-                        Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), REGISTRATION_FAIL, Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<User> call, Throwable t) {
                     resetInput();
+
                     Log.e("error", t.getMessage());
                     Toast.makeText(getApplicationContext(), MainActivity.DATABASE_ERROR, Toast.LENGTH_SHORT).show();
                 }
