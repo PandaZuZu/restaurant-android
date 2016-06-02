@@ -10,4 +10,13 @@
     <string name="loginButton">Log In</string>
     <string name="registerButton">Register</string>
     <string name="registerTextView">No account? Register here!</string>
+    <string name="title_activity_restaurant_map">Map</string>
+
+
+    <!-- permissions -->
+    <string name="permission_rationale_location">Access to Location is required.</string>
+    <string name="location_permission_denied">Location is required.</string>
+    <string name="permission_required_toast">Location permission is required.</string>
+
+
 </resources>

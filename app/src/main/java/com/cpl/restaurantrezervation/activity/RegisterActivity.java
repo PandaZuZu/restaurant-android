@@ -18,7 +18,6 @@ import com.cpl.restaurantrezervation.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 /*
     try request to create user on heroku
@@ -142,7 +141,7 @@ public class RegisterActivity extends Activity {
                     resetInput();
                     registerSpinner.setVisibility(View.GONE);
                     Log.e("error", t.getMessage());
-                    Toast.makeText(getApplicationContext(), MainActivity.DATABASE_ERROR, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), LoginActivity.DATABASE_ERROR, Toast.LENGTH_SHORT).show();
                 }
             });
 
