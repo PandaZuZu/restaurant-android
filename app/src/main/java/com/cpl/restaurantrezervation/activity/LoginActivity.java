@@ -3,10 +3,12 @@ package com.cpl.restaurantrezervation.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,15 +22,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /*
-    login to heroku server. check the response
+ *   login to Heroku server. check the response
  */
 
 public class LoginActivity extends Activity implements View.OnClickListener {
 
     private EditText usernameEditText;
     private EditText passwordEditText;
-    private Button logInButton;
-    private TextView registerTextView;
 
     public static final String DATABASE_ERROR = "Could not connect to database!";
     public static final String WRONG_INPUT = "Email or password must not be empty!";
@@ -117,6 +117,9 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     }
 
     private void setupReferences(){
+        Button logInButton;
+        TextView registerTextView;
+
         usernameEditText = (EditText)findViewById(R.id.usernameEditText);
         passwordEditText = (EditText)findViewById(R.id.passwordEditText);
         logInButton = (Button)findViewById(R.id.loginButton);
@@ -124,6 +127,9 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
         logInButton.setOnClickListener(this);
         registerTextView.setOnClickListener(this);
+
+        ScrollView scrollView = (ScrollView) findViewById(R.id.loginScrollView);
+        scrollView.setBackground(getResources().getDrawable(Utils.setRandomBitmap(), null));
 
     }
 }

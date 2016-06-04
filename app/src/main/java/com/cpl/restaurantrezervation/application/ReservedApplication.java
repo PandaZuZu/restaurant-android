@@ -3,7 +3,7 @@ package com.cpl.restaurantrezervation.application;
 import android.app.Application;
 
 /**
- * Created by txhung08 on 01/06/16.
+ *  Application for retrofit
  */
 public class ReservedApplication extends Application {
 

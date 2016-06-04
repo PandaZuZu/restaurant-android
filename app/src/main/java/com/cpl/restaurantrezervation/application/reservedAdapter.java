@@ -10,7 +10,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by txhung08 on 01/06/16.
+ *  Adapter for retrofit
+ *  Set our defined API
+ *  Add logs for requests
  */
 public class ReservedAdapter {
 

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    android:id="@+id/loginScrollView"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,7 +10,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".activity.LoginActivity"
-    android:fillViewport="false">
+    android:fillViewport="false"
+    android:background="@drawable/restaurant_background2">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -61,13 +64,14 @@
 
         <Button
             android:id="@+id/loginButton"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/input_margins"
             android:layout_below="@+id/passwordEditText"
-            android:padding="@dimen/input_padding"
+            android:paddingLeft="@dimen/input_padding"
+            android:paddingRight="@dimen/input_padding"
             android:textAlignment="center"
-            android:background="@color/loginButton"
+            android:background="@drawable/contact_gradient_separator"
             android:layout_centerHorizontal="true"
             android:text="@string/loginButton"/>
 

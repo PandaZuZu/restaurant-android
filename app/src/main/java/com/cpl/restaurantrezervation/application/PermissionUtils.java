@@ -1,14 +1,13 @@
 package com.cpl.restaurantrezervation.application;
 
-/**
- * Created by txhung08 on 02/06/16.
- */
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -76,6 +75,7 @@ public abstract class PermissionUtils {
             return dialog;
         }
 
+        @Nullable
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             mFinishActivity = getArguments().getBoolean(ARGUMENT_FINISH_ACTIVITY);
@@ -134,6 +134,7 @@ public abstract class PermissionUtils {
             return dialog;
         }
 
+        @Nullable
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             Bundle arguments = getArguments();

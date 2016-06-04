@@ -11,7 +11,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 /**
- * Created by txhung08 on 01/06/16.
+ *  Our API defined with get method to our online databse
  */
 public interface ReservedAPI {
     @GET("user/login/{email}/{password}")

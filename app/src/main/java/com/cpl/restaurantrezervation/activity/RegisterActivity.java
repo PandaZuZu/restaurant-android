@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.cpl.restaurantrezervation.R;
@@ -20,7 +21,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /*
-    try request to create user on heroku
+ *  try request to create user on heroku
  */
 
 public class RegisterActivity extends Activity {
@@ -28,7 +29,6 @@ public class RegisterActivity extends Activity {
     private EditText passwordEditText;
     private EditText confirmationEditText;
     private EditText emailEditText;
-    private Button registerButton;
 
     public static final String PASSWORD_ERROR_TOAST = "Password confirmation does not match!";
     public static final String PASSWORD_LENGTH_ERROR = "Password length must be between 8 and 20!";
@@ -48,6 +48,8 @@ public class RegisterActivity extends Activity {
     }
 
     private void setupReferences(){
+        Button registerButton;
+
         passwordEditText = (EditText)findViewById(R.id.passwordEditText);
         confirmationEditText = (EditText)findViewById(R.id.passwordConfirmationEditText);
         emailEditText = (EditText)findViewById(R.id.emailEditText);
@@ -55,6 +57,9 @@ public class RegisterActivity extends Activity {
 
         registerSpinner = (ProgressBar) findViewById(R.id.registerSpinner);
         registerSpinner.setVisibility(View.GONE);
+
+        ScrollView scrollView = (ScrollView) findViewById(R.id.registerView);
+        scrollView.setBackground(getResources().getDrawable(Utils.setRandomBitmap(), null));
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override

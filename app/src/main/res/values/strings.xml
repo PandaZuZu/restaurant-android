@@ -18,5 +18,7 @@
     <string name="location_permission_denied">Location is required.</string>
     <string name="permission_required_toast">Location permission is required.</string>
 
+    <!-- restaurant info -->
+    <string name="restaurant_contact_text">Contact: </string>
 
 </resources>

@@ -6,13 +6,24 @@
     <!-- main activity -->
     <dimen name="logo_margins">20dp</dimen>
     <dimen name="input_margins">10dp</dimen>
+    <dimen name="input_left_right_margin">30dp</dimen>
     <dimen name="input_padding">8dp</dimen>
     <dimen name="registerTextView">12sp</dimen>
-    
+
     <!-- map info window -->
     <dimen name="name_text_size">12sp</dimen>
     <dimen name="description_text_size">10sp</dimen>
     <dimen name="image_margin">8dp</dimen>
     <dimen name="image_size">100dp</dimen>
 
+    <!-- restaurant info -->
+    <dimen name="restaurant_image_size">100dp</dimen>
+    <dimen name="restaurant_name_text_size">18sp</dimen>
+    <dimen name="restaurant_name_top_margin">20dp</dimen>
+    <dimen name="restaurant_name_bottom_margin">15dp</dimen>
+    <dimen name="restaurant_description_text_size">15sp</dimen>
+    <dimen name="restaurant_description_bottom_margin">20dp</dimen>
+    <dimen name="restaurant_contact_text_size">12sp</dimen>
+    <dimen name="restaurant_contact_text_margin_right">10sp</dimen>
+    <dimen name="action_buttons_size">30dp</dimen>
 </resources>

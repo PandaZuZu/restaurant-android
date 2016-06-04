@@ -1,11 +1,10 @@
 package com.cpl.restaurantrezervation.activity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Camera;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
@@ -19,6 +18,7 @@ import com.cpl.restaurantrezervation.application.GoogleMapsInfoWindowAdapter;
 import com.cpl.restaurantrezervation.application.PermissionUtils;
 import com.cpl.restaurantrezervation.application.ReservedApplication;
 import com.cpl.restaurantrezervation.model.Restaurant;
+import com.cpl.restaurantrezervation.model.RestaurantList;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -38,12 +38,20 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+/*
+ * Show the google maps API
+ * First it gets our Location and move camera to our location
+ * Secondly add markers on map with our restaurants list
+ * Personalise infoShowWindow with our GoogleMapsInfoAdapter class
+ */
 
 public class RestaurantMapActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -60,10 +68,11 @@ public class RestaurantMapActivity extends AppCompatActivity implements
 
     private boolean mPermissionDenied = false;
 
-    public static HashMap <String, Bitmap> restaurantImages = new HashMap<>();
-
     private ImageLoader imageLoader = ImageLoader.getInstance();
     private GoogleMapsInfoWindowAdapter googleMapsInfoWindowAdapter;
+
+    public static HashMap <String, Bitmap> restaurantImages = new HashMap<>();
+    public static final String RESTAURANT_REFERENCE_TAG = "clickedRestaurant";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,8 +99,9 @@ public class RestaurantMapActivity extends AppCompatActivity implements
         result.enqueue(new Callback<List<Restaurant>>() {
             @Override
             public void onResponse(Call<List<Restaurant>> call, Response<List<Restaurant>> response) {
-                List<Restaurant> restaurantList = response.body();
-                for (Restaurant rs : restaurantList) {
+                RestaurantList.restaurantList = response.body();
+
+                for (Restaurant rs : RestaurantList.restaurantList) {
                     Log.d("body", rs.getName() + "\n" +
                                     rs.getDescription() + "\n" +
                                     rs.getOpened() + "\n" +
@@ -120,6 +130,7 @@ public class RestaurantMapActivity extends AppCompatActivity implements
         });
     }
 
+    //for each marker we add bitmap loaded to our hash so we can add it on view later
     private void getImageFromUrl(String url, final String markerId){
         imageLoader.loadImage(url, new SimpleImageLoadingListener() {
             @Override
@@ -133,9 +144,10 @@ public class RestaurantMapActivity extends AppCompatActivity implements
 
 
     private void initGoogleMapInfoAdapter(){
-        googleMapsInfoWindowAdapter = new GoogleMapsInfoWindowAdapter(this, imageLoader);
+        googleMapsInfoWindowAdapter = new GoogleMapsInfoWindowAdapter(this);
     }
 
+    //we configure the imageLoader then initiate it
     private void initImageLoader(){
         DisplayImageOptions options = new DisplayImageOptions.Builder()
                 .showImageOnLoading(R.mipmap.ic_launcher) // resource or drawable
@@ -282,5 +294,8 @@ public class RestaurantMapActivity extends AppCompatActivity implements
     @Override
     public void onInfoWindowClick(Marker marker) {
         marker.hideInfoWindow();
+        Intent intent = new Intent(this, RestaurantShow.class);
+        intent.putExtra(RESTAURANT_REFERENCE_TAG, marker.getTitle());
+        startActivity(intent);
     }
 }
