@@ -86,8 +86,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
                     if(!result.contains(NO_USER_FOUND)) {
                         Toast.makeText(getApplicationContext(), LOGIN_SUCCESS + result, Toast.LENGTH_SHORT).show();
-                        Intent restaurantMap = new Intent(getApplicationContext(), RestaurantMapActivity.class);
-                        startActivity(restaurantMap);
+                        Intent mainActivity = new Intent(getApplicationContext(), RestaurantMapActivity.class);
+                        startActivity(mainActivity);
                         finish();
                     }
                     else{

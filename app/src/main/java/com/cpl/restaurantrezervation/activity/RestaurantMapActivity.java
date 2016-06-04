@@ -2,16 +2,23 @@ package com.cpl.restaurantrezervation.activity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Camera;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
 
 import com.cpl.restaurantrezervation.R;
+import com.cpl.restaurantrezervation.application.GoogleMapsInfoWindowAdapter;
 import com.cpl.restaurantrezervation.application.PermissionUtils;
+import com.cpl.restaurantrezervation.application.ReservedApplication;
+import com.cpl.restaurantrezervation.model.Restaurant;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -21,12 +28,28 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+
+import java.util.HashMap;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RestaurantMapActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
+        GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMyLocationButtonClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback{
 
@@ -37,7 +60,10 @@ public class RestaurantMapActivity extends AppCompatActivity implements
 
     private boolean mPermissionDenied = false;
 
-    private Location mLocation;
+    public static HashMap <String, Bitmap> restaurantImages = new HashMap<>();
+
+    private ImageLoader imageLoader = ImageLoader.getInstance();
+    private GoogleMapsInfoWindowAdapter googleMapsInfoWindowAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +79,85 @@ public class RestaurantMapActivity extends AppCompatActivity implements
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API).build();
 
+        initGoogleMapInfoAdapter();
+        initImageLoader();
+
+
+
+        Call<List<Restaurant>> result = ((ReservedApplication)getApplication())
+                .getReservedAPI().getData();
+
+        result.enqueue(new Callback<List<Restaurant>>() {
+            @Override
+            public void onResponse(Call<List<Restaurant>> call, Response<List<Restaurant>> response) {
+                List<Restaurant> restaurantList = response.body();
+                for (Restaurant rs : restaurantList) {
+                    Log.d("body", rs.getName() + "\n" +
+                                    rs.getDescription() + "\n" +
+                                    rs.getOpened() + "\n" +
+                                    rs.getWebsite() + "\n" +
+                                    rs.getLatitude() + "\n" +
+                                    rs.getLongitude() + "\n" +
+                                    rs.getPictures().getUrl() + "\n" +
+                                    rs.getPictures().getStandard().getUrl() + "\n" +
+                                    rs.getPictures().getThumbnail().getUrl()
+                    );
+                    Marker restaurantMarker = mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(rs.getLatitude(), rs.getLongitude()))
+                            .title(rs.getName())
+                            .snippet("Opened: " +rs.getOpened() + "\n" +
+                                     "Website: " + rs.getWebsite() + "\n" +
+                                     "Phone: " + rs.getPhone()));
+
+                    getImageFromUrl(rs.getPictures().getUrl(), restaurantMarker.getId());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Restaurant>> call, Throwable t) {
+                Log.d("body", "error");
+            }
+        });
     }
 
+    private void getImageFromUrl(String url, final String markerId){
+        imageLoader.loadImage(url, new SimpleImageLoadingListener() {
+            @Override
+            public void onLoadingComplete(String imageUri,
+                                          View view, Bitmap loadedImage) {
+
+                restaurantImages.put(markerId, loadedImage);
+            }
+        });
+    }
+
+
+    private void initGoogleMapInfoAdapter(){
+        googleMapsInfoWindowAdapter = new GoogleMapsInfoWindowAdapter(this, imageLoader);
+    }
+
+    private void initImageLoader(){
+        DisplayImageOptions options = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.mipmap.ic_launcher) // resource or drawable
+                .resetViewBeforeLoading(false)  // default
+                .delayBeforeLoading(1000)
+                .cacheInMemory(false) // default
+                .cacheOnDisk(false) // default
+                .imageScaleType(ImageScaleType.IN_SAMPLE_POWER_OF_2) // default
+                .bitmapConfig(Bitmap.Config.ARGB_8888) // default
+                .build();
+
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getBaseContext())
+                .threadPriority(Thread.NORM_PRIORITY - 2)
+                .denyCacheImageMultipleSizesInMemory()
+                .diskCacheFileNameGenerator(new Md5FileNameGenerator())
+                .tasksProcessingOrder(QueueProcessingType.LIFO)
+                .defaultDisplayImageOptions(options)
+                .build();
+
+        imageLoader.init(config);
+
+    }
 
     /**
      * Manipulates the map once available.
@@ -75,6 +178,9 @@ public class RestaurantMapActivity extends AppCompatActivity implements
         mMap.animateCamera(zoom);
 
         mMap.setOnMyLocationButtonClickListener(this);
+        mMap.setOnInfoWindowClickListener(this);
+        mMap.setInfoWindowAdapter(googleMapsInfoWindowAdapter);
+
         enableMyLocation();
 
         //coonect api to get current location
@@ -90,9 +196,6 @@ public class RestaurantMapActivity extends AppCompatActivity implements
         }
     }
 
-    private void addLocations(GoogleMap mMap){
-        mMap.addMarker(new MarkerOptions().position(new LatLng(1, 1)).title("Restaurant"));
-    }
 
     private void enableMyLocation(){
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -149,6 +252,8 @@ public class RestaurantMapActivity extends AppCompatActivity implements
     @Override
     public void onConnected(Bundle bundle) {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            Location mLocation;
             mLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
             initCamera(mLocation);
         }
@@ -172,5 +277,10 @@ public class RestaurantMapActivity extends AppCompatActivity implements
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        marker.hideInfoWindow();
     }
 }

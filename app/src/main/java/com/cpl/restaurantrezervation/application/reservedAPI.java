@@ -1,7 +1,10 @@
 package com.cpl.restaurantrezervation.application;
 
+import com.cpl.restaurantrezervation.model.Restaurant;
 import com.cpl.restaurantrezervation.model.User;
 
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -18,4 +21,7 @@ public interface ReservedAPI {
     @GET("user/create/{email}/{password}")
     Call<User> register(@Path(value = "email", encoded = true) String email,
                             @Path(value = "password", encoded = true) String password);
+
+    @GET("restaurant/show")
+    Call<List<Restaurant>> getData();
 }
