@@ -1,7 +1,9 @@
 package com.cpl.restaurantrezervation.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -12,16 +14,28 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.cpl.restaurantrezervation.R;
 import com.cpl.restaurantrezervation.application.GoogleMapsInfoWindowAdapter;
 import com.cpl.restaurantrezervation.application.PermissionUtils;
 import com.cpl.restaurantrezervation.application.ReservedApplication;
+import com.cpl.restaurantrezervation.model.Coordinate;
 import com.cpl.restaurantrezervation.model.Restaurant;
 import com.cpl.restaurantrezervation.model.RestaurantList;
+import com.cpl.restaurantrezervation.utils.Utils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,7 +52,6 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -51,20 +64,24 @@ import retrofit2.Response;
  * First it gets our Location and move camera to our location
  * Secondly add markers on map with our restaurants list
  * Personalise infoShowWindow with our GoogleMapsInfoAdapter class
+ * Check distance to see if user is close to the reward place
  */
 
 public class RestaurantMapActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
+        LocationListener,
         GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMapClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback{
 
     private GoogleMap mMap;
     private GoogleApiClient googleApiClient;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    public static final double MIN_DISTANCE = 0.0004;
 
     private boolean mPermissionDenied = false;
 
@@ -73,6 +90,13 @@ public class RestaurantMapActivity extends AppCompatActivity implements
 
     public static HashMap <String, Bitmap> restaurantImages = new HashMap<>();
     public static final String RESTAURANT_REFERENCE_TAG = "clickedRestaurant";
+
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+
+    private boolean mRequestingUpdate = true;
+
+    protected LocationRequest mLocationRequest = new LocationRequest();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +118,7 @@ public class RestaurantMapActivity extends AppCompatActivity implements
 
 
         Call<List<Restaurant>> result = ((ReservedApplication)getApplication())
-                .getReservedAPI().getData();
+                .getReservedAPI().getData(Utils.parseURL(MainActivity.currentUser.getEmail()));
 
         result.enqueue(new Callback<List<Restaurant>>() {
             @Override
@@ -115,9 +139,9 @@ public class RestaurantMapActivity extends AppCompatActivity implements
                     Marker restaurantMarker = mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(rs.getLatitude(), rs.getLongitude()))
                             .title(rs.getName())
-                            .snippet("Opened: " +rs.getOpened() + "\n" +
-                                     "Website: " + rs.getWebsite() + "\n" +
-                                     "Phone: " + rs.getPhone()));
+                            .snippet("Opened: " + rs.getOpened() + "\n" +
+                                    "Website: " + rs.getWebsite() + "\n" +
+                                    "Phone: " + rs.getPhone()));
 
                     getImageFromUrl(rs.getPictures().getUrl(), restaurantMarker.getId());
                 }
@@ -192,6 +216,7 @@ public class RestaurantMapActivity extends AppCompatActivity implements
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnInfoWindowClickListener(this);
         mMap.setInfoWindowAdapter(googleMapsInfoWindowAdapter);
+        mMap.setOnMapClickListener(this);
 
         enableMyLocation();
 
@@ -223,6 +248,7 @@ public class RestaurantMapActivity extends AppCompatActivity implements
 
     @Override
     public boolean onMyLocationButtonClick() {
+        mRequestingUpdate = true;
         return false;
     }
 
@@ -263,8 +289,14 @@ public class RestaurantMapActivity extends AppCompatActivity implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        getLocation();
+        if (mRequestingUpdate) {
+            startLocationUpdates();
+        }
+    }
 
+    private void getLocation(){
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Location mLocation;
             mLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
             initCamera(mLocation);
@@ -272,14 +304,97 @@ public class RestaurantMapActivity extends AppCompatActivity implements
     }
 
     public void initCamera(Location mLocation){
-        CameraUpdate center = CameraUpdateFactory.newLatLng(
-                new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
+        if(mLocation != null && mRequestingUpdate) {
+            Log.d("update", mLocation.getLatitude() + " " + mLocation.getLongitude());
+            CameraUpdate center = CameraUpdateFactory.newLatLng(
+                    new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
 
-        CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
+            CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
 
-        mMap.moveCamera(center);
-        mMap.animateCamera(zoom);
+            mMap.moveCamera(center);
+            mMap.animateCamera(zoom);
+        }
+
+        createLocationRequest();
     }
+
+    protected void createLocationRequest() {
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setFastestInterval(500);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(googleApiClient,
+                        builder.build());
+
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                final LocationSettingsStates locationSettingsStates = result.getLocationSettingsStates();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied. But could be fixed by showing the user
+                        // a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(
+                                    RestaurantMapActivity.this,
+                                    REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way to fix the
+                        // settings so we won't show the dialog.
+
+                        break;
+                }
+            }
+        });
+
+
+
+
+    }
+
+
+    protected void startLocationUpdates() {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    googleApiClient, mLocationRequest, this);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
+        switch (requestCode) {
+            case REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        // All required changes were successfully made
+                        mRequestingUpdate = true;
+
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        // The user was asked to change settings, but chose not to
+                        finish();
+                        break;
+                    default:
+                        break;
+                }
+                break;
+        }
+    }
+
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -297,5 +412,28 @@ public class RestaurantMapActivity extends AppCompatActivity implements
         Intent intent = new Intent(this, RestaurantShow.class);
         intent.putExtra(RESTAURANT_REFERENCE_TAG, marker.getTitle());
         startActivity(intent);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        initCamera(location);
+        Log.d("location", location.getLatitude() + " " + location.getLongitude());
+
+        for(Restaurant rs:RestaurantList.restaurantList) {
+            if (calculateDistance(location, rs)) {
+                Toast.makeText(this, "added", Toast.LENGTH_SHORT).show();
+
+            }
+        }
+    }
+
+    private boolean calculateDistance(Location currentLocation, Restaurant rs) {
+     return Utils.distanceBetweenPoints(new Coordinate(currentLocation.getLatitude(), currentLocation.getLongitude()),
+                                        new Coordinate(rs.getLatitude(), rs.getLongitude())) <= MIN_DISTANCE;
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        mRequestingUpdate = false;
     }
 }

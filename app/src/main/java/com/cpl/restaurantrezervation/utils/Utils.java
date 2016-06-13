@@ -1,8 +1,7 @@
 package com.cpl.restaurantrezervation.utils;
 
-import android.graphics.Bitmap;
-
 import com.cpl.restaurantrezervation.R;
+import com.cpl.restaurantrezervation.model.Coordinate;
 
 import java.util.Random;
 
@@ -11,7 +10,6 @@ import java.util.Random;
  */
 public class Utils {
 
-    private static final int backgroundNumbers = 2;
     private static final int[] drawable = {
             R.drawable.rsz_restaurant_background,
             R.drawable.restaurant_background2
@@ -31,13 +29,16 @@ public class Utils {
 
     public static int setRandomBitmap(){
         Random random = new Random();
-        switch (random.nextInt(drawable.length)){
-            case 0:
-                return R.drawable.rsz_restaurant_background;
-            case 1:
-                return R.drawable.restaurant_background2;
+
+        if(drawable.length > 0){
+            return drawable[random.nextInt(drawable.length)];
         }
 
         return 0;
+    }
+
+    public static double distanceBetweenPoints(Coordinate a, Coordinate b){
+        double sumDouble = Math.pow(b.getLatitude() - a.getLatitude(), 2) + Math.pow(b.getLongitude() - a.getLongitude(), 2);
+        return Math.sqrt(sumDouble);
     }
 }

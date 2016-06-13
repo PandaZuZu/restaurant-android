@@ -9,6 +9,8 @@
     <dimen name="input_left_right_margin">30dp</dimen>
     <dimen name="input_padding">8dp</dimen>
     <dimen name="registerTextView">12sp</dimen>
+    <dimen name="icons_size">50dp</dimen>
+    <dimen name="coins_text_size">30sp</dimen>
 
     <!-- map info window -->
     <dimen name="name_text_size">12sp</dimen>

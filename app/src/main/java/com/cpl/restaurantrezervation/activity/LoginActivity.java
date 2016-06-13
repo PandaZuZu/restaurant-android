@@ -3,7 +3,6 @@ package com.cpl.restaurantrezervation.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -85,8 +84,9 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                     loginSpinner.setVisibility(View.GONE);
 
                     if(!result.contains(NO_USER_FOUND)) {
+                        MainActivity.currentUser = response.body();
                         Toast.makeText(getApplicationContext(), LOGIN_SUCCESS + result, Toast.LENGTH_SHORT).show();
-                        Intent mainActivity = new Intent(getApplicationContext(), RestaurantMapActivity.class);
+                        Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(mainActivity);
                         finish();
                     }

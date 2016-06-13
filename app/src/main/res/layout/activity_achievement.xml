@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    android:id="@+id/mainView"
+    android:id="@+id/achievementView"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,48 +9,12 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.cpl.restaurantrezervation.activity.MainActivity"
-    >
+    tools:context="com.cpl.restaurantrezervation.activity.AchievementActivity">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_alignParentEnd="true"
-        android:background="@drawable/application_gradient_background">
-
-        <TextView
-            android:id="@+id/coinsText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="@dimen/input_padding"
-            android:paddingEnd="@dimen/input_padding"
-            android:textSize="@dimen/coins_text_size"
-            android:layout_gravity="center"/>
-
-        <ImageView
-            android:id="@+id/coins"
-            android:layout_width="@dimen/icons_size"
-            android:layout_height="wrap_content"
-            android:paddingStart="@dimen/input_padding"
-            android:paddingEnd="@dimen/input_padding"
-            android:src="@drawable/coins"
-            android:contentDescription="@string/app_name"/>
-
-
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/logoImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/reserved"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:contentDescription="@string/app_name"/>
 
 
     <LinearLayout
+        android:id="@+id/footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -96,5 +60,66 @@
             android:contentDescription="@string/app_name"/>
 
     </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/achievementText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/image_margin"
+        android:textSize="@dimen/coins_text_size"
+        android:layout_centerHorizontal="true"
+        android:text="Achievements" />
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/footer"
+        android:layout_below="@+id/achievementText"
+        android:fillViewport="true" >
+
+        <LinearLayout
+            android:id="@+id/achievementLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/doneText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/image_margin"
+                android:textSize="@dimen/coins_text_size"
+                android:text="Awarded:"/>
+
+            <LinearLayout
+                android:id="@+id/doneAchievements"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/notDoneText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/image_margin"
+                android:textSize="@dimen/coins_text_size"
+                android:text="Not Awarded:"/>
+
+            <LinearLayout
+                android:id="@+id/notDoneAchievements"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </RelativeLayout>
