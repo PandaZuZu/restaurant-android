@@ -120,7 +120,9 @@ public class RestaurantShow extends AppCompatActivity implements View.OnClickLis
         restaurantImageView = (ImageView) findViewById(R.id.restaurantPicture);
 
         RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.restaurantView);
-        relativeLayout.setBackground(getResources().getDrawable(Utils.setRandomBitmap(), null));
+        if(relativeLayout != null) {
+            relativeLayout.setBackground(getResources().getDrawable(Utils.setRandomBitmap(), null));
+        }
     }
 
 

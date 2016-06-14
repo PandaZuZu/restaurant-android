@@ -7,22 +7,21 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.cpl.restaurantrezervation.R;
 import com.cpl.restaurantrezervation.application.ReservedApplication;
 import com.cpl.restaurantrezervation.model.AchievementList;
 import com.cpl.restaurantrezervation.model.Achievements;
+import com.cpl.restaurantrezervation.model.Item;
+import com.cpl.restaurantrezervation.model.Shop;
 import com.cpl.restaurantrezervation.model.User;
 import com.cpl.restaurantrezervation.utils.Utils;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
@@ -42,10 +41,11 @@ public class MainActivity extends Activity implements View.OnClickListener{
 
     public static User currentUser;
 
-    private TextView coinsText;
+    public static TextView coinsText;
     private ImageLoader imageLoader = ImageLoader.getInstance();
 
     public static HashMap<Integer, Bitmap> achievementImages = new HashMap<>();
+    public static HashMap<Integer, Bitmap> shopItemImages = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +55,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
         setReferences();
         initImageLoader();
         getDataFromWeb();
+        getShopItemsFromWeb();
 
     }
 
@@ -89,8 +90,12 @@ public class MainActivity extends Activity implements View.OnClickListener{
                 startActivity(achievementActivity);
                 break;
             case R.id.shop:
+                Intent shopActivity = new Intent(this, ShopActivity.class);
+                startActivity(shopActivity);
                 break;
             case R.id.help:
+                Intent helpActivity = new Intent(this, HelpActivity.class);
+                startActivity(helpActivity);
                 break;
             default:
                 break;
@@ -115,6 +120,38 @@ public class MainActivity extends Activity implements View.OnClickListener{
             @Override
             public void onFailure(Call<List<Achievements>> call, Throwable t) {
                 Log.d("body", "error");
+            }
+        });
+    }
+
+    private void getShopItemsFromWeb(){
+        Call<List<Item>> result = ((ReservedApplication)getApplication())
+                .getReservedAPI().getShopItems();
+
+        result.enqueue(new Callback<List<Item>>() {
+            @Override
+            public void onResponse(Call<List<Item>> call, Response<List<Item>> response) {
+                Shop.shopItems = response.body();
+
+                for(Item item : Shop.shopItems){
+                    getShopFromUrl(item.getPictures().getUrl(), item.getId());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Item>> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void getShopFromUrl(String url, final int shopId){
+        imageLoader.loadImage(url, new SimpleImageLoadingListener() {
+            @Override
+            public void onLoadingComplete(String imageUri,
+                                          View view, Bitmap loadedImage) {
+
+                shopItemImages.put(shopId, loadedImage);
             }
         });
     }

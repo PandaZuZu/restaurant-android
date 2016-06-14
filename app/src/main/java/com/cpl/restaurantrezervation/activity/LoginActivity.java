@@ -80,20 +80,27 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             result.enqueue(new Callback<User>() {
                 @Override
                 public void onResponse(Call<User> call, Response<User> response) {
-                    String result = response.body().getEmail();
                     loginSpinner.setVisibility(View.GONE);
 
-                    if(!result.contains(NO_USER_FOUND)) {
-                        MainActivity.currentUser = response.body();
-                        Toast.makeText(getApplicationContext(), LOGIN_SUCCESS + result, Toast.LENGTH_SHORT).show();
-                        Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
-                        startActivity(mainActivity);
-                        finish();
+                    if(response.body() != null) {
+                        String result = response.body().getEmail();
+
+                        if (!result.contains(NO_USER_FOUND)) {
+                            MainActivity.currentUser = response.body();
+                            Toast.makeText(getApplicationContext(), LOGIN_SUCCESS + result, Toast.LENGTH_SHORT).show();
+                            Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
+                            startActivity(mainActivity);
+                            finish();
+                        } else {
+                            resetInput();
+                            Toast.makeText(getApplicationContext(), USERNAME_WRONG, Toast.LENGTH_SHORT).show();
+                        }
                     }
-                    else{
+                    else {
                         resetInput();
                         Toast.makeText(getApplicationContext(), USERNAME_WRONG, Toast.LENGTH_SHORT).show();
                     }
+
 
                 }
 

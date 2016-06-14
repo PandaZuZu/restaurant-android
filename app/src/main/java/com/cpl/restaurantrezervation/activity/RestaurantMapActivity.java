@@ -13,16 +13,23 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cpl.restaurantrezervation.R;
 import com.cpl.restaurantrezervation.application.GoogleMapsInfoWindowAdapter;
 import com.cpl.restaurantrezervation.application.PermissionUtils;
 import com.cpl.restaurantrezervation.application.ReservedApplication;
+import com.cpl.restaurantrezervation.model.Achievements;
 import com.cpl.restaurantrezervation.model.Coordinate;
 import com.cpl.restaurantrezervation.model.Restaurant;
 import com.cpl.restaurantrezervation.model.RestaurantList;
+import com.cpl.restaurantrezervation.model.User;
 import com.cpl.restaurantrezervation.utils.Utils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -97,6 +104,7 @@ public class RestaurantMapActivity extends AppCompatActivity implements
 
     protected LocationRequest mLocationRequest = new LocationRequest();
 
+    private Restaurant closestRestuarant;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -419,15 +427,73 @@ public class RestaurantMapActivity extends AppCompatActivity implements
         initCamera(location);
         Log.d("location", location.getLatitude() + " " + location.getLongitude());
 
-        for(Restaurant rs:RestaurantList.restaurantList) {
-            if (calculateDistance(location, rs)) {
-                Toast.makeText(this, "added", Toast.LENGTH_SHORT).show();
+        if(RestaurantList.restaurantList != null) {
+            for (Restaurant rs : RestaurantList.restaurantList) {
+                if (closeEnough(location, rs)) {
+                    closestRestuarant = rs;
+                    Call<User> result = ((ReservedApplication) getApplication())
+                            .getReservedAPI().visitedLocation(MainActivity.currentUser.getId(), rs.getId());
 
+                    result.enqueue(new Callback<User>() {
+                        @Override
+                        public void onResponse(Call<User> call, Response<User> response) {
+                            if (response.body() != null) {
+                                User temp = response.body();
+                                int coins = MainActivity.currentUser.getCoins() + 100;
+                                if (temp.getAchievements() != null) {
+                                    for (Achievements achievement : temp.getAchievements()) {
+                                        boolean contains = false;
+                                        if (MainActivity.currentUser.getAchievements() != null) {
+                                            for (Achievements userAchievement : MainActivity.currentUser.getAchievements()) {
+                                                if (achievement.getId() == userAchievement.getId()) {
+                                                    contains = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (!contains) {
+                                                LayoutInflater inflater = getLayoutInflater();
+                                                View view = inflater.inflate(R.layout.toast_custom,
+                                                        (ViewGroup) findViewById(R.id.relativeLayout1));
+
+                                                ImageView imageView1 = (ImageView) view.findViewById(R.id.toastImage);
+                                                TextView textView1 = (TextView) view.findViewById(R.id.toastText);
+
+                                                imageView1.setImageBitmap(MainActivity.achievementImages.get(achievement.getId()));
+                                                textView1.setText(achievement.getTitle());
+
+                                                Toast toast = new Toast(getApplicationContext());
+                                                toast.setGravity(Gravity.TOP, 0, 0);
+                                                toast.setDuration(Toast.LENGTH_LONG);
+                                                toast.setView(view);
+                                                toast.show();
+                                                coins += 100;
+                                            }
+                                        }
+                                    }
+
+                                    MainActivity.currentUser = temp;
+                                    MainActivity.currentUser.setCoins(coins);
+                                    MainActivity.coinsText.setText(coins + " ");
+                                    RestaurantList.restaurantList.remove(closestRestuarant);
+
+
+                                }
+                            } else {
+                                Toast.makeText(getApplicationContext(), LoginActivity.DATABASE_ERROR, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<User> call, Throwable t) {
+                            Toast.makeText(getApplicationContext(), LoginActivity.DATABASE_ERROR, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
             }
         }
     }
 
-    private boolean calculateDistance(Location currentLocation, Restaurant rs) {
+    private boolean closeEnough(Location currentLocation, Restaurant rs) {
      return Utils.distanceBetweenPoints(new Coordinate(currentLocation.getLatitude(), currentLocation.getLongitude()),
                                         new Coordinate(rs.getLatitude(), rs.getLongitude())) <= MIN_DISTANCE;
     }

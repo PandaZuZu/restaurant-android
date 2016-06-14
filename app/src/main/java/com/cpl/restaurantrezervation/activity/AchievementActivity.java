@@ -1,10 +1,12 @@
 package com.cpl.restaurantrezervation.activity;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -30,7 +32,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AchievementActivity extends AppCompatActivity {
+public class AchievementActivity extends AppCompatActivity implements View.OnClickListener{
 
     LinearLayout doneLinearLayout;
     LinearLayout notDoneLinearLayout;
@@ -69,9 +71,30 @@ public class AchievementActivity extends AppCompatActivity {
 
     private void setReferences(){
         RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.achievementView);
-        relativeLayout.setBackground(getResources().getDrawable(Utils.setRandomBitmap(), null));
+        if(relativeLayout != null) {
+            relativeLayout.setBackground(getResources().getDrawable(Utils.setRandomBitmap(), null));
+        }
         doneLinearLayout = (LinearLayout) findViewById(R.id.doneAchievements);
         notDoneLinearLayout = (LinearLayout) findViewById(R.id.notDoneAchievements);
+
+        ImageButton compass = (ImageButton) findViewById(R.id.compass);
+        ImageButton achievement = (ImageButton) findViewById(R.id.achievement);
+        ImageButton shop = (ImageButton) findViewById(R.id.shop);
+        ImageButton help = (ImageButton) findViewById(R.id.help);
+
+        if(compass != null) {
+            compass.setOnClickListener(this);
+        }
+        if(achievement != null) {
+            //achievement.setOnClickListener(this);
+        }
+        if(shop != null) {
+            shop.setOnClickListener(this);
+        }
+        if(help != null) {
+            help.setOnClickListener(this);
+        }
+
 
     }
 
@@ -139,6 +162,30 @@ public class AchievementActivity extends AppCompatActivity {
         linearLayout.addView(textView);
 
         this.notDoneLinearLayout.addView(linearLayout);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.compass:
+                Intent mapActivity = new Intent(this, RestaurantMapActivity.class);
+                startActivity(mapActivity);
+                break;
+            case R.id.achievement:
+                Intent achievementActivity = new Intent(this, AchievementActivity.class);
+                startActivity(achievementActivity);
+                break;
+            case R.id.shop:
+                Intent shopActivity = new Intent(this, ShopActivity.class);
+                startActivity(shopActivity);
+                break;
+            case R.id.help:
+                Intent helpActivity = new Intent(this, HelpActivity.class);
+                startActivity(helpActivity);
+                break;
+            default:
+                break;
+        }
     }
 }
 

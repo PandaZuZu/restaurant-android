@@ -20,5 +20,6 @@
 
     <!-- restaurant info -->
     <string name="restaurant_contact_text">Contact: </string>
+    <string name="title_activity_shop">ShopActivity</string>
 
 </resources>

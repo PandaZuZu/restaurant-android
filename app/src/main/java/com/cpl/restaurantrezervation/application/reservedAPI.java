@@ -1,6 +1,7 @@
 package com.cpl.restaurantrezervation.application;
 
 import com.cpl.restaurantrezervation.model.Achievements;
+import com.cpl.restaurantrezervation.model.Item;
 import com.cpl.restaurantrezervation.model.Restaurant;
 import com.cpl.restaurantrezervation.model.User;
 
@@ -28,4 +29,15 @@ public interface ReservedAPI {
 
     @GET("achievement/show/")
     Call<List<Achievements>> getAchievement();
+
+    @GET("item/show/")
+    Call<List<Item>> getShopItems();
+
+    @GET("item/buy/{email}/{item}")
+    Call<User> buyItem(@Path(value = "email" , encoded = true) int user_id,
+                         @Path(value = "item" , encoded = true) int item_id);
+
+    @GET("user/visited/{email}/{location}")
+    Call<User> visitedLocation(@Path(value = "email", encoded = true) int user_id,
+                                 @Path(value = "location", encoded = true) int location_id);
 }

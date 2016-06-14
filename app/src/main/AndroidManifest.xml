@@ -61,7 +61,9 @@
             android:name=".activity.RestaurantMapActivity"
             android:label="@string/title_activity_restaurant_map" />
         <activity android:name=".activity.RestaurantShow" />
-        <activity android:name=".activity.AchievementActivity"></activity>
+        <activity android:name=".activity.AchievementActivity" />
+        <activity android:name=".activity.ShopActivity" />
+        <activity android:name=".activity.HelpActivity"></activity>
     </application>
 
 </manifest>

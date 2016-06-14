@@ -28,4 +28,5 @@
     <dimen name="restaurant_contact_text_size">12sp</dimen>
     <dimen name="restaurant_contact_text_margin_right">10sp</dimen>
     <dimen name="action_buttons_size">30dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>
